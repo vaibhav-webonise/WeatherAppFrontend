@@ -1,0 +1,26 @@
+.weatherWidget {
+  background-color: lightgrey;
+   margin: 20px;
+  padding: 20px;
+}
+ 
+h3 {
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.errorMessage { 
+  color: rgb(255, 0, 0);
+}
+
+h4 {
+   font-family: 'Times New Roman', Times, serif;
+}
+
+h5 {
+  font-family: 'Times New Roman', Times, serif;
+}
+
+label {
+  font-family: 'Times New Roman', Times, serif;
+}
+  
