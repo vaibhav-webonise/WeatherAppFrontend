@@ -9,7 +9,9 @@ Platform used: `Ubuntu 16.04.6 LTS`
 IDE used: `Visual studio code 1.39.2`
 
 Framework used: `React Js`
+
 Authentication : `Firebase SDK Authentication`
+
 Firebase Identity provider: `Facebook`
 
 Prerequisites: 
