@@ -8,7 +8,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 function App() {
   return (
     <Router>
-      <Navbar></Navbar>
+      <Navbar/>
       <Switch>
         <Route exact path='/' component={Login} />
         <Route path='/weather' component={Weather} />

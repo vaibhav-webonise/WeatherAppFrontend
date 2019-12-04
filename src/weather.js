@@ -1,5 +1,5 @@
 import React from 'react';
-import { WEATHER_API_KEY, API_URL, PAGE_NO, STATUS_NOT_FOUND, STATUS_OK } from './AppConstants'
+import { WEATHER_API_KEY, API_URL, PAGE_NO, STATUS_NOT_FOUND, STATUS_OK, INTERNAL_SERVER_ERROR } from './AppConstants'
 import axios from 'axios';
 import './weather.css'
 import { Link } from 'react-router-dom'
@@ -19,10 +19,10 @@ export class Weather extends React.Component {
   }
 
   componentDidMount() {
-    if (sessionStorage.getItem('idToken') !== 'invalid') {
+    if (localStorage.getItem('idToken') !== 'invalid') {
       axios({
         method: 'GET',
-        url: `${API_URL}/cities/${sessionStorage.getItem('username')}/${PAGE_NO}`,
+        url: `${API_URL}/cities/${localStorage.getItem('username')}/${PAGE_NO}`,
         headers:
         {
           'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
@@ -35,7 +35,9 @@ export class Weather extends React.Component {
           this.getInfo();
         }
       }).catch((error) => {
-        console.log(error.message);
+        if (error.response.status === STATUS_NOT_FOUND) {
+          this.setState({ errorMessage: 'Could not find previously visited city' });
+        }
       })
     }
   }
@@ -43,7 +45,7 @@ export class Weather extends React.Component {
   saveCity = (city) => {
     axios({
       method: 'POST',
-      url: `${API_URL}/cities/${sessionStorage.getItem('username')}`,
+      url: `${API_URL}/cities/${localStorage.getItem('username')}`,
       data: {
         cityname: city,
       },
@@ -53,9 +55,13 @@ export class Weather extends React.Component {
         'Content-Type': 'application/json',
       },
     }).then(() => {
-      this.setState({ errorMessage: '', });
+      this.setState({ errorMessage: null, });
     }).catch((error) => {
-      console.log(error.message);
+      if (error.response.status === INTERNAL_SERVER_ERROR) {
+        this.setState({ errorMessage: 'Sorry!, Your search is not recorded' });
+      } else if (error.response.status === STATUS_NOT_FOUND) {
+        this.setState({ errorMessage: error.response.data });
+      }
     })
   }
 
@@ -84,10 +90,10 @@ export class Weather extends React.Component {
   }
 
   render() {
-    if (sessionStorage.getItem('idToken') !== 'invalid') {
+    if (localStorage.getItem('idToken') !== 'invalid') {
       return (
         <div className='App'><br /><br />
-          <h3>Welcome {sessionStorage.getItem('username')}</h3><br /><br />
+          <h3>Welcome {localStorage.getItem('username')}</h3><br /><br />
 
           <label for='city'>Enter city name </label><input type='text' name='city' value={this.state.city} onChange={this.onUserType} placeholder='Enter city name' />
           <input onClick={this.getInfo} type='button' value='submit' />

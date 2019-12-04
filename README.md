@@ -12,10 +12,10 @@ Framework used: `React Js`
 
 Authentication : `Firebase SDK Authentication`
 
-Firebase Identity provider: `Facebook`
+Firebase Identity provider: `Facebook & Twitter`
 
 Prerequisites: 
-`1. Facebook account to login to the application`
+`1. Facebook & Twitter account to login to the application`
 
 Installation: To run this app follow given steps,
 
@@ -23,16 +23,15 @@ Steps:
 
     1.Clone this repository or download zip in your system.
     
-    `2.After cloning or downloading open this directory in your IDE (visual studio code)`
-            go to file->open folder
-    
-    3.Open terminal of your IDE
+    2.After cloning or downloading open this directory 
+            
+    3.Open terminal 
     
     4.Type
         -- $npm install
         
-    5.Then run your app using follwing command on the terminal
-        -- $npm start
+    5.Then run this app type follwing command on the terminal
+        -- $HTTPS=true npm start
 After follwing these all steps your application will be running on http://localhost:3000/
 
 Note: Make sure that server is running too before running this app 

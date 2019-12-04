@@ -13,19 +13,19 @@ export class Facebook extends React.Component {
     this.state = {
       isSignedIn: false,
       username: '',
+      errorMessage: null,
     }
-  }
-
-  uiConfig = {
-    signInFlow: "popup",
-    signInOptions:
-      [firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-      firebase.auth.TwitterAuthProvider.PROVIDER_ID,
-      ],
-    callbacks: {
-      signInSuccess: () => {
-        window.location.assign(`/weather`);
-      },
+    this.uiConfig = {
+      signInFlow: "popup",
+      signInOptions:
+        [firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+        firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+        ],
+      callbacks: {
+        signInSuccess: () => {
+          window.location.assign(`/weather`);
+        },
+      }
     }
   }
 
@@ -33,12 +33,12 @@ export class Facebook extends React.Component {
     firebase.auth().onAuthStateChanged(user => {
       this.setState({ isSignedIn: !!user })
       if (user) {
+        localStorage.setItem('idToken', user.uid);
+        localStorage.setItem('username', user.displayName);
         this.saveUserInDatabase(user.displayName, user.uid);
-        sessionStorage.setItem('idToken', user.uid);
-        sessionStorage.setItem('username', user.displayName);
       }
       else {
-        sessionStorage.setItem('idToken', 'invalid');
+        localStorage.setItem('idToken', 'invalid');
       }
     })
   }
@@ -54,7 +54,7 @@ export class Facebook extends React.Component {
     }).then((response) => {
       localStorage.setItem('jwtToken', response.data.jwt);
     }).catch((error) => {
-      console.log(error.message);
+      this.setState({ errorMessage: error.response.data });
     })
   }
 
@@ -72,6 +72,7 @@ export class Facebook extends React.Component {
             <h3>Welcome {firebase.auth().currentUser.displayName}</h3>
             <img src={firebase.auth().currentUser.photoURL}></img><br /><br />
             <button onClick={() => firebase.auth().signOut()}>Sign out!</button>
+            <h3>{this.state.errorMessage}</h3>
           </div>
         ) : (
             <StyledFirebaseAuth

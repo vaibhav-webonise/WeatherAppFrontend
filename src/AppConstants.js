@@ -5,3 +5,4 @@ export const API_URL = 'http://localhost:8080';
 export const PAGE_NO = 0;
 export const STATUS_NOT_FOUND = 404;
 export const STATUS_OK = 200;
+export const INTERNAL_SERVER_ERROR = 500;
