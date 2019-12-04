@@ -16,7 +16,10 @@ export class Facebook extends React.Component {
 
   uiConfig = {
     signInFlow: "popup",
-    signInOptions: [firebase.auth.FacebookAuthProvider.PROVIDER_ID,],
+    signInOptions:
+      [firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+      firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+      ],
     callbacks: {
       signInSuccess: () => {
         window.location.assign(`/weather`);
@@ -29,7 +32,7 @@ export class Facebook extends React.Component {
       this.setState({ isSignedIn: !!user })
       if (user) {
         this.saveUserInDatabase(user.displayName, user.uid);
-        sessionStorage.setItem('idToken', user.getIdToken);
+        sessionStorage.setItem('idToken', user.uid);
         sessionStorage.setItem('username', user.displayName);
       }
       else {
