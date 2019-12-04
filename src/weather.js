@@ -2,6 +2,7 @@ import React from 'react';
 import { WEATHER_API_KEY, API_URL, PAGE_NO, STATUS_NOT_FOUND, STATUS_OK } from './AppConstants'
 import axios from 'axios';
 import './weather.css'
+import { Link } from 'react-router-dom'
 
 export class Weather extends React.Component {
 
@@ -103,7 +104,7 @@ export class Weather extends React.Component {
     }
     else {
       return (
-        <div className='App'><h3>You are currently logout</h3></div>
+        <div className='App'><h3>You are currently logout <Link to='/'>click here</Link> to log in</h3></div>
       )
     }
   }

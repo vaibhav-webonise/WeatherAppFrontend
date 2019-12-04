@@ -2,6 +2,8 @@ import React from 'react'
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth"
 import axios from 'axios'
 import firebase from './Firebase'
+import logo from './logo.svg'
+import './App.css'
 import { API_URL } from './AppConstants'
 
 export class Facebook extends React.Component {
@@ -59,6 +61,10 @@ export class Facebook extends React.Component {
   render() {
     return (
       <div className='App'>
+        <div className='App-header'>
+          <img src={logo} className='App-logo' alt='logo'></img>
+          <h2>Welcome to Weather application</h2>
+        </div>
         <br />
         {this.state.isSignedIn ? (
           <div>
