@@ -1,5 +1,5 @@
 import React from 'react';
-import { WEATHER_API_KEY, API_URL, PAGE_NO, STATUS_NOT_FOUND, STATUS_OK, INTERNAL_SERVER_ERROR } from './AppConstants'
+import { WEATHER_API_KEY, API_URL, PAGE_NO, STATUS_NOT_FOUND, STATUS_OK, NETWORK_ERROR, UNAUTHORIZED } from './AppConstants'
 import axios from 'axios';
 import './weather.css'
 import { Link } from 'react-router-dom'
@@ -57,10 +57,13 @@ export class Weather extends React.Component {
     }).then(() => {
       this.setState({ errorMessage: null, });
     }).catch((error) => {
-      if (error.response.status === INTERNAL_SERVER_ERROR) {
-        this.setState({ errorMessage: 'Sorry!, Your search is not recorded' });
+      if (error.message === NETWORK_ERROR) {
+        this.setState({ errorMessage: error.message });
+      } else if (error.response.status === UNAUTHORIZED) {
+        alert(error.response.data.message);
+        this.props.history.push('/');
       } else if (error.response.status === STATUS_NOT_FOUND) {
-        this.setState({ errorMessage: error.response.data });
+        this.setState({ errorMessage: error.response.data.message });
       }
     })
   }
@@ -81,7 +84,7 @@ export class Weather extends React.Component {
           location: response.data.name,
           humidity: response.data.main.humidity,
           city: '',
-        })
+        });
     }).catch((error) => {
       if (error.response.status === STATUS_NOT_FOUND) {
         this.setState({ errorMessage: 'You have entered invalid city name', city: '', });

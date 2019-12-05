@@ -15,6 +15,7 @@ export class Facebook extends React.Component {
       username: '',
       errorMessage: null,
     }
+
     this.uiConfig = {
       signInFlow: "popup",
       signInOptions:
@@ -54,7 +55,7 @@ export class Facebook extends React.Component {
     }).then((response) => {
       localStorage.setItem('jwtToken', response.data.jwt);
     }).catch((error) => {
-      this.setState({ errorMessage: error.response.data });
+      this.setState({ errorMessage: error.response.data.message });
     })
   }
 
@@ -72,7 +73,7 @@ export class Facebook extends React.Component {
             <h3>Welcome {firebase.auth().currentUser.displayName}</h3>
             <img src={firebase.auth().currentUser.photoURL}></img><br /><br />
             <button onClick={() => firebase.auth().signOut()}>Sign out!</button>
-            <h3>{this.state.errorMessage}</h3>
+            <h4>{this.state.errorMessage}</h4>
           </div>
         ) : (
             <StyledFirebaseAuth

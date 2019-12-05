@@ -31,7 +31,7 @@ Steps:
         -- $npm install
         
     5.Then run this app type follwing command on the terminal
-        -- $HTTPS=true npm start
+        -- $npm start
 After follwing these all steps your application will be running on http://localhost:3000/
 
 Note: Make sure that server is running too before running this app 

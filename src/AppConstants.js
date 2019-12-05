@@ -6,3 +6,5 @@ export const PAGE_NO = 0;
 export const STATUS_NOT_FOUND = 404;
 export const STATUS_OK = 200;
 export const INTERNAL_SERVER_ERROR = 500;
+export const UNAUTHORIZED = 401;
+export const NETWORK_ERROR = 'Network Error';
