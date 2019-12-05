@@ -19,6 +19,7 @@ Prerequisites:
 `1. Facebook & Twitter account to login to the application`
 
 Installation: To run this app follow given steps.
+
 Note that you have node.js server environment before running this application otherwise installation is necessary.
 
 Steps:
@@ -37,8 +38,9 @@ Steps:
     
     6.You may see a message 'Not Secure' something like this, In case of unvavailable SSL certificate.
      
-    7.If you face this issue please select advance and choose to proceed anyway as this application is developed with the HTTPS secure connection.
-    
+    7.If you face this issue please select advance and choose to proceed anyway as this application 
+    uses facebook social login that enforce enable HTTPS for secure connection.
+
 After follwing these all steps your application will be running on https://localhost:3000/
 
 Note: Make sure that server is running too before running this app 
