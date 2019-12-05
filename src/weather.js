@@ -35,7 +35,9 @@ export class Weather extends React.Component {
           this.getInfo();
         }
       }).catch((error) => {
-        if (error.response.status === STATUS_NOT_FOUND) {
+        if (error.message === NETWORK_ERROR) {
+          this.setState({ errorMessage: error.message });
+        } else if (error.response.status === STATUS_NOT_FOUND) {
           this.setState({ errorMessage: 'Could not find previously visited city' });
         }
       })
