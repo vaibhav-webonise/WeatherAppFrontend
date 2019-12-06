@@ -4,7 +4,7 @@ import axios from 'axios'
 import firebase from './Firebase'
 import logo from './logo.svg'
 import './App.css'
-import { API_URL } from './AppConstants'
+import { API_URL, NETWORK_ERROR } from './AppConstants'
 
 export class Facebook extends React.Component {
 
@@ -55,7 +55,12 @@ export class Facebook extends React.Component {
     }).then((response) => {
       localStorage.setItem('jwtToken', response.data.jwt);
     }).catch((error) => {
-      this.setState({ errorMessage: error.response.data.message });
+      if (error.message === NETWORK_ERROR) {
+        this.setState({ errorMessage: error.message });
+        firebase.auth().signOut()
+      } else {
+        this.setState({ errorMessage: error.response.data.message });
+      }
     })
   }
 

@@ -8,3 +8,4 @@ export const STATUS_OK = 200;
 export const INTERNAL_SERVER_ERROR = 500;
 export const UNAUTHORIZED = 401;
 export const NETWORK_ERROR = 'Network Error';
+export const COUNT_ZERO = 0;

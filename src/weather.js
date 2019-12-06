@@ -1,20 +1,20 @@
 import React from 'react';
-import { WEATHER_API_KEY, API_URL, PAGE_NO, STATUS_NOT_FOUND, STATUS_OK, NETWORK_ERROR, UNAUTHORIZED } from './AppConstants'
+import { WEATHER_API_KEY, API_URL, PAGE_NO, STATUS_NOT_FOUND, NETWORK_ERROR, UNAUTHORIZED, STATUS_OK, COUNT_ZERO } from './AppConstants'
 import axios from 'axios';
 import './weather.css'
 import { Link } from 'react-router-dom'
+import { ListWidgets } from './ListWidgets';
 
 export class Weather extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      city: '',
-      clouds: '',
-      location: '',
-      humidity: '',
+      searchCity: '',
       username: '',
       errorMessage: '',
+      weatherInfo: [],
+      flag: false,
     };
   }
 
@@ -22,7 +22,10 @@ export class Weather extends React.Component {
     if (localStorage.getItem('idToken') !== 'invalid') {
       axios({
         method: 'GET',
-        url: `${API_URL}/cities/${localStorage.getItem('username')}/${PAGE_NO}`,
+        url: `${API_URL}/cities/${PAGE_NO}`,
+        params: {
+          'username': localStorage.getItem('username'),
+        },
         headers:
         {
           'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
@@ -30,9 +33,8 @@ export class Weather extends React.Component {
           'Content-Type': 'application/json',
         },
       }).then((response) => {
-        if (response.status === STATUS_OK) {
-          this.setState({ city: response.data[0].cityname });
-          this.getInfo();
+        for (let i = 0; i < response.data.length; i++) {
+          this.getWeatherData(response.data[i].cityname)
         }
       }).catch((error) => {
         if (error.message === NETWORK_ERROR) {
@@ -44,12 +46,12 @@ export class Weather extends React.Component {
     }
   }
 
-  saveCity = (city) => {
+  addCity = (city) => {
     axios({
       method: 'POST',
-      url: `${API_URL}/cities/${localStorage.getItem('username')}`,
+      url: `${API_URL}/cities/${city}`,
       data: {
-        cityname: city,
+        'username': localStorage.getItem('username'),
       },
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
@@ -57,7 +59,7 @@ export class Weather extends React.Component {
         'Content-Type': 'application/json',
       },
     }).then(() => {
-      this.setState({ errorMessage: null, });
+      this.setState({ errorMessage: null, searchCity: '' });
     }).catch((error) => {
       if (error.message === NETWORK_ERROR) {
         this.setState({ errorMessage: error.message });
@@ -71,25 +73,62 @@ export class Weather extends React.Component {
   }
 
   onUserType = event => {
-    this.setState({ city: event.target.value, });
+    this.setState({ searchCity: event.target.value.trim(), });
   };
 
-  getInfo = () => {
+  getWeatherData = (city) => {
     axios({
       method: 'GET',
-      url: `https://api.openweathermap.org/data/2.5/weather?q=${this.state.city}&APPID=${WEATHER_API_KEY}`,
+      url: `https://api.openweathermap.org/data/2.5/weather?q=${city}&APPID=${WEATHER_API_KEY}`,
     }).then((response) => {
-      this.saveCity(this.state.city);
-      this.setState(
-        {
-          clouds: response.data.weather[0].description,
-          location: response.data.name,
-          humidity: response.data.main.humidity,
-          city: '',
-        });
+      if (this.state.flag) {
+        this.addCity(city);
+        this.setState({ flag: false, searchCity: '' });
+      }
+      let weatherInfo = {
+        clouds: response.data.weather[0].description,
+        location: response.data.name,
+        humidity: response.data.main.humidity,
+        windSpeed: response.data.wind.speed,
+      }
+      this.setState({ weatherInfo: [...this.state.weatherInfo, weatherInfo] });
     }).catch((error) => {
-      if (error.response.status === STATUS_NOT_FOUND) {
-        this.setState({ errorMessage: 'You have entered invalid city name', city: '', });
+      if (error.message === NETWORK_ERROR) {
+        this.setState({ errorMessage: error.message });
+      } else if (error.response.status === STATUS_NOT_FOUND) {
+        this.setState({ errorMessage: 'You have entered invalid city name' });
+      }
+    })
+  }
+
+  setFlag = (event) => {
+    event.preventDefault();
+    this.setState({ flag: true });
+    this.getWeatherData(this.state.searchCity);
+  }
+
+  removeWidget = (city) => {
+    axios({
+      method: 'DELETE',
+      url: `${API_URL}/cities/${city}`,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    }).then((response) => {
+      if (response.data > COUNT_ZERO && response.status === STATUS_OK) {
+        let weatherInfo = this.state.weatherInfo.filter((weatherDataObject) => weatherDataObject.location !== city);
+        this.setState({ weatherInfo, })
+      }
+    }).catch((error) => {
+      if (error.message === NETWORK_ERROR) {
+        this.setState({ errorMessage: error.message });
+      } else if (error.response.status === UNAUTHORIZED) {
+        alert(error.response.data.message);
+        this.props.history.push('/');
+      } else if (error.response.status === STATUS_NOT_FOUND) {
+        this.setState({ errorMessage: error.response.data.message });
       }
     })
   }
@@ -97,18 +136,13 @@ export class Weather extends React.Component {
   render() {
     if (localStorage.getItem('idToken') !== 'invalid') {
       return (
-        <div className='App'><br /><br />
-          <h3>Welcome {localStorage.getItem('username')}</h3><br /><br />
-
-          <label for='city'>Enter city name </label><input type='text' name='city' value={this.state.city} onChange={this.onUserType} placeholder='Enter city name' />
-          <input onClick={this.getInfo} type='button' value='submit' />
-
-          <div className='weatherWidget' >
-            <h4>Check the weather information of your city</h4>
-            <h5>City: {this.state.location}</h5>
-            <h5>Clouds: {this.state.clouds}</h5>
-            <h5>Humidity: {this.state.humidity}</h5>
-          </div>
+        <div><br />
+          <h3>Welcome {localStorage.getItem('username')}</h3>
+          <form onSubmit={this.setFlag}>
+            <input type='text' name='city' value={this.state.searchCity} required onChange={this.onUserType} placeholder='Enter city name' />
+            <input type='submit' value='+' />
+          </form><br />
+          <ListWidgets weatherInfo={this.state.weatherInfo} removeWidget={this.removeWidget}></ListWidgets>
           <h4 className='errorMessage'>{this.state.errorMessage}</h4>
         </div>
       );
