@@ -4,20 +4,19 @@
   
   table {
     border-spacing: 7px;
-    background-color: rgb(155, 147, 147);
   }
   
   th { 
     text-align: center;
     padding: 10px;
-    background: #FCE4EC;
+    background: rgb(190, 192, 194);    
   }
   
   td {
     text-align: center;
     background: #F00;
     padding: 10px;
-    background: #FCE4EC;    
+    background: rgb(190, 192, 194);    
   }
       
   tr {
@@ -32,15 +31,4 @@
 
   h4 {
       color: #F00;
-  }
-  
-  .myButton {
-    padding: 10px;
-    display:block;
-    background-color:rgb(155, 147, 147);
-    color: rgb(19, 18, 18);
-    text-align:center;
-    position: absolute;
-    top: 12px;
-    right: 20px;
   }

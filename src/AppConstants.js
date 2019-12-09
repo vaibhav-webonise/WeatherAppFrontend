@@ -9,3 +9,4 @@ export const INTERNAL_SERVER_ERROR = 500;
 export const UNAUTHORIZED = 401;
 export const NETWORK_ERROR = 'Network Error';
 export const COUNT_ZERO = 0;
+export const STATUS_CONFLICT = 409;

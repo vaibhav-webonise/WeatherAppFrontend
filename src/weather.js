@@ -1,5 +1,5 @@
 import React from 'react';
-import { WEATHER_API_KEY, API_URL, PAGE_NO, STATUS_NOT_FOUND, NETWORK_ERROR, UNAUTHORIZED, STATUS_OK, COUNT_ZERO } from './AppConstants'
+import { WEATHER_API_KEY, API_URL, PAGE_NO, STATUS_NOT_FOUND, NETWORK_ERROR, UNAUTHORIZED, STATUS_OK, COUNT_ZERO, STATUS_CONFLICT, INTERNAL_SERVER_ERROR } from './AppConstants'
 import axios from 'axios';
 import './weather.css'
 import { Link } from 'react-router-dom'
@@ -13,8 +13,9 @@ export class Weather extends React.Component {
       searchCity: '',
       username: '',
       errorMessage: '',
-      weatherInfo: [],
+      weatherData: [],
       flag: false,
+      tempWeatherInfo: null,
     };
   }
 
@@ -40,7 +41,7 @@ export class Weather extends React.Component {
         if (error.message === NETWORK_ERROR) {
           this.setState({ errorMessage: error.message });
         } else if (error.response.status === STATUS_NOT_FOUND) {
-          this.setState({ errorMessage: 'Could not find previously visited city' });
+          this.setState({ errorMessage: 'No recent search available' });
         }
       })
     }
@@ -59,7 +60,11 @@ export class Weather extends React.Component {
         'Content-Type': 'application/json',
       },
     }).then(() => {
-      this.setState({ errorMessage: null, searchCity: '' });
+      this.setState({
+        weatherData: [...this.state.weatherData, this.state.tempWeatherInfo],
+        errorMessage: null,
+        searchCity: null,
+      });
     }).catch((error) => {
       if (error.message === NETWORK_ERROR) {
         this.setState({ errorMessage: error.message });
@@ -68,42 +73,51 @@ export class Weather extends React.Component {
         this.props.history.push('/');
       } else if (error.response.status === STATUS_NOT_FOUND) {
         this.setState({ errorMessage: error.response.data.message });
+      } else if (error.response.status === STATUS_CONFLICT) {
+        this.setState({ errorMessage: error.response.data.message });
       }
     })
   }
 
   onUserType = event => {
-    this.setState({ searchCity: event.target.value.trim(), });
+    this.setState({ searchCity: event.target.value, });
   };
 
   getWeatherData = (city) => {
-    axios({
-      method: 'GET',
-      url: `https://api.openweathermap.org/data/2.5/weather?q=${city}&APPID=${WEATHER_API_KEY}`,
-    }).then((response) => {
-      if (this.state.flag) {
-        this.addCity(city);
-        this.setState({ flag: false, searchCity: '' });
-      }
-      let weatherInfo = {
-        clouds: response.data.weather[0].description,
-        location: response.data.name,
-        humidity: response.data.main.humidity,
-        windSpeed: response.data.wind.speed,
-      }
-      this.setState({ weatherInfo: [...this.state.weatherInfo, weatherInfo] });
-    }).catch((error) => {
-      if (error.message === NETWORK_ERROR) {
-        this.setState({ errorMessage: error.message });
-      } else if (error.response.status === STATUS_NOT_FOUND) {
-        this.setState({ errorMessage: 'You have entered invalid city name' });
-      }
-    })
+    if (city.trim() !== '') {
+      axios({
+        method: 'GET',
+        url: `https://api.openweathermap.org/data/2.5/weather?q=${city}&APPID=${WEATHER_API_KEY}`,
+      }).then((response) => {
+        let weatherData = {
+          clouds: response.data.weather[0].description,
+          location: response.data.name,
+          humidity: response.data.main.humidity,
+          windSpeed: response.data.wind.speed,
+        }
+        if (this.state.flag) {
+          this.setState({ tempWeatherInfo: weatherData, });
+          this.addCity(city.trim());
+          this.setState({ flag: false, searchCity: '', });
+        }
+        else {
+          this.setState({ weatherData: [...this.state.weatherData, weatherData], });
+        }
+      }).catch((error) => {
+        if (error.message === NETWORK_ERROR) {
+          this.setState({ errorMessage: error.message });
+        } else if (error.response.status === STATUS_NOT_FOUND) {
+          this.setState({ errorMessage: 'You have entered invalid city name', searchCity: '', });
+        }
+      })
+    } else {
+      this.setState({ errorMessage: 'Invalid input', searchCity: '', });
+    }
   }
 
   setFlag = (event) => {
     event.preventDefault();
-    this.setState({ flag: true });
+    this.setState({ flag: true, });
     this.getWeatherData(this.state.searchCity);
   }
 
@@ -111,15 +125,18 @@ export class Weather extends React.Component {
     axios({
       method: 'DELETE',
       url: `${API_URL}/cities/${city}`,
+      data: {
+        'username': localStorage.getItem('username'),
+      },
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
     }).then((response) => {
-      if (response.data > COUNT_ZERO && response.status === STATUS_OK) {
-        let weatherInfo = this.state.weatherInfo.filter((weatherDataObject) => weatherDataObject.location !== city);
-        this.setState({ weatherInfo, })
+      if (response.status === STATUS_OK && response.data > COUNT_ZERO) {
+        let weatherData = this.state.weatherData.filter((weatherDataObject) => weatherDataObject.location !== city);
+        this.setState({ weatherData, errorMessage: '', })
       }
     }).catch((error) => {
       if (error.message === NETWORK_ERROR) {
@@ -128,6 +145,8 @@ export class Weather extends React.Component {
         alert(error.response.data.message);
         this.props.history.push('/');
       } else if (error.response.status === STATUS_NOT_FOUND) {
+        this.setState({ errorMessage: error.response.data.message });
+      } else if (error.response.status === INTERNAL_SERVER_ERROR) {
         this.setState({ errorMessage: error.response.data.message });
       }
     })
@@ -142,7 +161,7 @@ export class Weather extends React.Component {
             <input type='text' name='city' value={this.state.searchCity} required onChange={this.onUserType} placeholder='Enter city name' />
             <input type='submit' value='+' />
           </form><br />
-          <ListWidgets weatherInfo={this.state.weatherInfo} removeWidget={this.removeWidget}></ListWidgets>
+          <ListWidgets weatherInfo={this.state.weatherData} removeWidget={this.removeWidget}></ListWidgets>
           <h4 className='errorMessage'>{this.state.errorMessage}</h4>
         </div>
       );

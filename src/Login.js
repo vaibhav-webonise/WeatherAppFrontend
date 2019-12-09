@@ -34,6 +34,7 @@ export class Facebook extends React.Component {
     firebase.auth().onAuthStateChanged(user => {
       this.setState({ isSignedIn: !!user })
       if (user) {
+        console.log("logged in use:", user.uid)
         localStorage.setItem('idToken', user.uid);
         localStorage.setItem('username', user.displayName);
         this.saveUserInDatabase(user.displayName, user.uid);
