@@ -1,0 +1,12 @@
+export const WEATHER_API_KEY = '6a2bf1285c0d50e68050c1d411a61d23';
+export const FIREBASE_WEB_API_KEY = 'AIzaSyDpMbuwv278xFtyZvkavuq6k-kVuyuh9QU';
+export const FIREBASE_AUTH_DOMAIN = 'weather-app-af529.firebaseapp.com';
+export const API_URL = 'http://localhost:8080';
+export const PAGE_NO = 0;
+export const STATUS_NOT_FOUND = 404;
+export const STATUS_OK = 200;
+export const INTERNAL_SERVER_ERROR = 500;
+export const UNAUTHORIZED = 401;
+export const NETWORK_ERROR = 'Network Error';
+export const COUNT_ZERO = 0;
+export const STATUS_CONFLICT = 409;
